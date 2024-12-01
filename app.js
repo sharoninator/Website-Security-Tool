@@ -4,9 +4,11 @@ const path = require('path');
 const app = express()
 const port = 3000
 
+app.use(express.static(path.join(__dirname, 'public')));
+
 app.get('/', (req, res) => {
-  res.send('Hello, welcome to my secure web application! dont test it, its fully secure i swear!')
-})
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
 
 app.get('/pathtraversal', (req, res) => {
   res.send("Path traversal vulnerability example. Try to add ..%2F to the url and read a file. Can you read /etc/passwd?")
@@ -14,13 +16,12 @@ app.get('/pathtraversal', (req, res) => {
 
 app.get('/pathtraversal/*', (req, res) => {
   let filePath = path.resolve(__dirname + req.params[0]);
-  if(fs.existsSync(filePath)){
+  if (fs.existsSync(filePath)) {
     res.sendFile(filePath);
-  }else {
+  } else {
     res.send("File at " + filePath + " doesn't exist.");
   }
 })
-
 
 app.get('/login', (req, res) => {
   let { username, password } = req.query;
