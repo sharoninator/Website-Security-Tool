@@ -13,46 +13,46 @@
             <div class="dropdown">
                 <label>Choose an exploit:</label>
                 <select id="exploit-select">
-                    <option value="Path Traversal">Path Traversal</option>
                     <option value="Default Credentials">Default Credentials</option>
+                    <option value="Path Traversal">Path Traversal</option>
                     <option value="Default Credentials">Insecure Design</option>
                 </select>
+                <button onclick="sendExploit()">Send Exploit</button>
             </div>
-            <button onclick="sendExploit()">Send Exploit</button>
         </div>
 
 
-        <div class="flex-container">
-            <iframe id="exploit-iframe" src="http://localhost:3000/pathtraversal/" width="100%" height="400px"></iframe>
+        <div class="flex-container vertical">
+            <input id="url-bar" type="text" readonly>
+            <iframe id="exploit-iframe" src="" width="100%" height="400px"></iframe>
         </div>
 
-        <div class="flex-container">
+        <div class="flex-container code-box">
             <div class="flex-item" id="attack-terminal">
-                <h3>Attack Code</h3>
-                <p id="attack-code"></p>
+                <h3>Attack Request</h3>
+                <pre id="attack-code"></pre>
             </div>
             <div class="flex-item" id="response-terminal">
-                <h3>Response</h3>
-                <p id="response-output">Server response will appear here...</p>
+                <h3>Attack Success</h3>
+                <pre id="response-output">Was the exploit successful?</pre>
             </div>
         </div>
 
-        <div class="flex-container">
+        <div class="flex-container code-box">
             <div class="flex-item">
                 <h3>Vulnerable Code</h3>
-                <pre id="vulnerable-code">
+                <pre id="vulnerable-code"></pre>
             </div>
             <div class="flex-item">
                 <h3>Secure Code</h3>
-                <pre id="secure-code">
+                <pre id="secure-code"></pre>
             </div>
         </div>
 
         <div class="documentation">
             <h2>Documentation</h2>
-            <p>
-                Select an exploit from the dropdown to view its description.
-            </p>
+            <div id = "docs">
+            </div>
         </div>
     </div>
 

