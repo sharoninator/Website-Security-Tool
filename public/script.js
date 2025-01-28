@@ -2,7 +2,7 @@ const response_output = document.getElementById("response-output");
 const vulnerableCode = document.getElementById("vulnerable-code");
 const secureCode = document.getElementById("secure-code");
 const exploitSelect = document.getElementById("exploit-select");
-const attackRequest = document.getElementById("attack-request");
+const attackRequest = document.getElementById("attack-code");
 const iframe = document.getElementById("exploit-iframe");
 const urlbar = document.getElementById("url-bar");
 
