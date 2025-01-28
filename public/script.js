@@ -2,7 +2,7 @@ const response_output = document.getElementById("response-output");
 const vulnerableCode = document.getElementById("vulnerable-code");
 const secureCode = document.getElementById("secure-code");
 const exploitSelect = document.getElementById("exploit-select");
-const attackCode = document.getElementById("attack-code");
+const attackRequest = document.getElementById("attack-request");
 const iframe = document.getElementById("exploit-iframe");
 const urlbar = document.getElementById("url-bar");
 
@@ -26,6 +26,14 @@ const exploitData = {
     });`,
     documentation_html_filepath: "pathtraversal.html"
   },
+  "Insecure Design": {
+    vulnerable: `Not yet implemented`,
+    url: "http://localhost:3000/bank",
+    secure: `Secure version not yet implemented`,
+    successful_substring: "secret",
+    attack_request: "???",
+    documentation_html_filepath: "placeholder.html"
+  },
   "Path Traversal": {
     vulnerable: `let filePath = path.resolve(__dirname + req.params[0]);
       if (fs.existsSync(filePath)) {
@@ -37,7 +45,7 @@ const exploitData = {
     secure: `Secure version not yet implemented`,
     successful_substring: "secret",
     attack_request: "http://localhost:3000/pathtraversal/..%2F..%2F..%2Fsecret.txt",
-    documentation_html_filepath: "pathtraversal.html"
+    documentation_html_filepath: "placeholder.html"
   }
 }
 
@@ -46,7 +54,7 @@ function updateCode() {
   const exploit = exploitData[selectedExploit];
   vulnerableCode.textContent = exploit.vulnerable;
   secureCode.textContent = exploit.secure;
-  attackCode.textContent = exploit.attack_request
+  attackRequest.textContent = exploit.attack_request
   iframe.src = exploit.url;
   urlbar.value = exploit.url;
 }
@@ -86,6 +94,17 @@ async function sendExploit() {
 }
 
 
+function addExploitOptions() {
+  selectElement = document.getElementById("exploit-select")
+  for (let key of Object.keys(exploitData)) {
+    const option = document.createElement('option');
+    option.value = key;
+    option.textContent = key;
+    selectElement.appendChild(option);
+  }
+}
 
 exploitSelect.addEventListener("change", updateCode);
+
+addExploitOptions();
 updateCode();

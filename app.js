@@ -76,6 +76,14 @@ app.get('/pathtraversal/*', (req, res) => {
   }
 })
 
+app.post('/bankendpoint', (req, res) => {
+  let { user, amount } = req.body;
+});
+
+app.get('/bank', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'bank.html'));
+});
+
 app.get('/login', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'login.html'));
 });
