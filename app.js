@@ -5,6 +5,8 @@ const fetch = require('node-fetch');
 const app = express()
 const port = 3000
 
+let accounts;
+
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
@@ -76,12 +78,30 @@ app.get('/pathtraversal/*', (req, res) => {
   }
 })
 
-app.post('/bankendpoint', (req, res) => {
-  let { user, amount } = req.body;
+app.get('/bank', (req, res) => {
+  accounts = { // reset user accounts on refresh
+    l33th4x0r: 950,
+    john: 5500,
+    gary: 2000,
+    wendy: 1250,
+  };
+  res.sendFile(path.join(__dirname, 'public', 'bank.html'));
 });
 
-app.get('/bank', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'bank.html'));
+app.post('/bank', (req, res) => {
+  let { recipient, amount } = req.body;
+  amount = parseInt(amount);
+  if (typeof amount === 'number') {
+    if (amount > accounts.l33th4x0r) {
+      amount = accounts.l33th4x0r;
+    }
+    accounts.l33th4x0r -= amount;
+    accounts[recipient] += amount;
+    res.json({ accountInfo: accounts, amountDeducted: amount });
+  }
+  else { 
+    res.send("Invalid data") 
+  }
 });
 
 app.get('/login', (req, res) => {

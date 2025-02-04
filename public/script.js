@@ -24,6 +24,7 @@ const exploitData = {
       },
       body: JSON.stringify({ username: 'admin', password: 'admin' }),
     });`,
+    server_side_exploit: true,
     documentation_html_filepath: "pathtraversal.html"
   },
   "Insecure Design": {
@@ -32,6 +33,7 @@ const exploitData = {
     secure: `Secure version not yet implemented`,
     successful_substring: "secret",
     attack_request: "???",
+    server_side_exploit: false,
     documentation_html_filepath: "placeholder.html"
   },
   "Path Traversal": {
@@ -45,6 +47,7 @@ const exploitData = {
     secure: `Secure version not yet implemented`,
     successful_substring: "secret",
     attack_request: "http://localhost:3000/pathtraversal/..%2F..%2F..%2Fsecret.txt",
+    server_side_exploit: true,
     documentation_html_filepath: "placeholder.html"
   }
 }
@@ -62,34 +65,61 @@ function updateCode() {
 
 async function sendExploit() {
   try {
-    const selectedExploit = exploitSelect.value;
-    const response = await fetch('/exploit', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ exploitType: selectedExploit })
-    });
+    let selectedExploit = exploitSelect.value;
+    if (exploitData[selectedExploit].server_side_exploit == true) { // the exploit is to be sent from the server, and the iframe will be overwritten with the response
 
-    if (response.ok) {
-      const result = await response.text();
-      console.log("Response body:", result);
+      const response = await fetch('/exploit', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ exploitType: selectedExploit })
+      });
 
-      // https://stackoverflow.com/questions/8240101/set-content-of-iframe
-      iframe.src = "about:blank";
-      iframe.contentWindow.document.open();
-      iframe.contentWindow.document.write(result);
-      iframe.contentWindow.document.close();
-      if (result.includes(exploitData[selectedExploit].successful_substring)) {
-        response_output.innerHTML = "The attack was successful!";
+      if (response.ok) {
+        const result = await response.text();
+        console.log("Response body:", result);
+
+        // https://stackoverflow.com/questions/8240101/set-content-of-iframe
+        iframe.src = "about:blank";
+        iframe.contentWindow.document.open();
+        iframe.contentWindow.document.write(result);
+        iframe.contentWindow.document.close();
+        if (result.includes(exploitData[selectedExploit].successful_substring)) {
+          response_output.innerHTML = "The attack was successful!";
+        } else {
+          response_output.innerHTML = "The exploit failed.";
+        }
       } else {
-        response_output.innerHTML = "The exploit failed.";
+        console.log("Error:", response.status, response.statusText);
       }
-    } else {
-      console.log("Error:", response.status, response.statusText);
+    } else { // the exploit is to be sent from the iframe.
+
+      console.log("Executing in iframe " + exploitData[selectedExploit].attack_request)
+      iframe.contentWindow.eval(exploitData[selectedExploit].attack_request);
+      result = iframe.contentWindow.document.body.innerText;
+
+      const checkInterval = 50;
+      const timeout = 5000;
+      let elapsedTime = 0;
+
+      const intervalId = setInterval(() => {
+        const result = iframe.contentWindow.document.body.innerText;
+
+        if (result.includes(exploitData[selectedExploit].successful_substring)) {
+          clearInterval(intervalId);
+          response_output.innerHTML = "The attack was successful!";
+        } else if (elapsedTime >= timeout) {
+          clearInterval(intervalId);
+          response_output.innerHTML = "The exploit failed.";
+        }
+
+        elapsedTime += checkInterval;
+      }, checkInterval);
+
     }
   } catch (error) {
-    response_output.innerHTML = "ERROR";
+    response_output.innerHTML = "Error: " + error;
   }
 }
 
