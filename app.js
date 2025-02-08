@@ -2,7 +2,6 @@ import fetch from 'node-fetch';
 import express from 'express';
 import fs from 'fs';
 import path from 'path';
-import puppeteer from 'puppeteer';
 
 const app = express()
 const port = 3000
@@ -15,18 +14,6 @@ const __dirname = path.dirname(__filename);
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
-
-
-const browser = await puppeteer.launch({
-  executablePath: '/usr/bin/google-chrome',
-  args: ['--no-sandbox', '--disable-setuid-sandbox'],
-});
-const page = await browser.newPage();
-await page.goto('https://www.example.com');
-
-// Do something on the page
-
-await browser.close();
 
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
