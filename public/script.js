@@ -24,6 +24,7 @@ const exploitData = {
       },
       body: JSON.stringify({ username: 'admin', password: 'admin' }),
     });`,
+    custom_behavior: false,
     server_side_exploit: true,
     documentation_html_filepath: "pathtraversal.html"
   },
@@ -33,6 +34,7 @@ const exploitData = {
     secure: `Secure version not yet implemented`,
     successful_substring: "secret",
     attack_request: "???",
+    custom_behavior: false,
     server_side_exploit: false,
     documentation_html_filepath: "placeholder.html"
   },
@@ -47,6 +49,17 @@ const exploitData = {
     secure: `Secure version not yet implemented`,
     successful_substring: "secret",
     attack_request: "http://localhost:3000/pathtraversal/..%2F..%2F..%2Fsecret.txt",
+    custom_behavior: false,
+    server_side_exploit: true,
+    documentation_html_filepath: "placeholder.html"
+  },
+  "Software and Data Integrity Failures": {
+    vulnerable: `??????????????`,
+    url: "http://localhost:3001/#/search?q=advanced",
+    secure: `Secure version not yet implemented`,
+    successful_substring: "secret",
+    attack_request: "????????",
+    custom_behavior: true,
     server_side_exploit: true,
     documentation_html_filepath: "placeholder.html"
   }
@@ -54,10 +67,12 @@ const exploitData = {
 
 function updateCode() {
   const selectedExploit = exploitSelect.value;
+  localStorage.setItem('selectedExploit', selectedExploit);
+
   const exploit = exploitData[selectedExploit];
   vulnerableCode.textContent = exploit.vulnerable;
   secureCode.textContent = exploit.secure;
-  attackRequest.textContent = exploit.attack_request
+  attackRequest.textContent = exploit.attack_request;
   iframe.src = exploit.url;
   urlbar.value = exploit.url;
 }
@@ -80,11 +95,17 @@ async function sendExploit() {
         const result = await response.text();
         console.log("Response body:", result);
 
-        // https://stackoverflow.com/questions/8240101/set-content-of-iframe
-        iframe.src = "about:blank";
-        iframe.contentWindow.document.open();
-        iframe.contentWindow.document.write(result);
-        iframe.contentWindow.document.close();
+        if (exploitData[selectedExploit].custom_behavior) {
+          if(selectedExploit == "Software and Data Integrity Failures"){
+            location.reload()
+          }
+        } else {
+          // https://stackoverflow.com/questions/8240101/set-content-of-iframe
+          iframe.src = "about:blank";
+          iframe.contentWindow.document.open();
+          iframe.contentWindow.document.write(result);
+          iframe.contentWindow.document.close();
+        }
         if (result.includes(exploitData[selectedExploit].successful_substring)) {
           response_output.innerHTML = "The attack was successful!";
         } else {
@@ -133,8 +154,18 @@ function addExploitOptions() {
     selectElement.appendChild(option);
   }
 }
+addExploitOptions();
+
+
+const savedExploit = localStorage.getItem('selectedExploit');
+if (savedExploit != null) {
+  exploitSelect.value = savedExploit;
+} else {
+  exploitSelect.value = Object.keys(exploitData)[0];
+  localStorage.setItem('selectedExploit', exploitSelect.value);
+}
+
 
 exploitSelect.addEventListener("change", updateCode);
 
-addExploitOptions();
 updateCode();
