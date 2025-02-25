@@ -11,6 +11,7 @@ let accounts;
 const __filename = new URL(import.meta.url).pathname;
 const __dirname = path.dirname(__filename);
 
+app.set('view engine', 'ejs');
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
@@ -60,7 +61,7 @@ async function productTampering() {
     const data = {
       id: 9,
       name: 'OWASP SSL Advanced Forensic Tool (O-Saft)',
-      description: 'https://owasp.slack.com',
+      description: 'Product description not tampered with :)',
       price: 0.01,
       deluxePrice: 0.01,
       image: 'orange_juice.jpg',
@@ -114,7 +115,30 @@ async function productTampering() {
   }
 }
 
+app.get('/textreader', (req, res) => {
+  let fileName = req.query.fileName;
+  let infoString;
+  let fileContent = "Select a text file to read it."
+  let filePath = path.resolve(__dirname + "/" + fileName);
+  // console.log(req.query)
+  console.log("PATH: " + filePath);
+  if(fileName){ // if the user gave a filepath, update filecontents and infostring.
+  console.log(filePath);
+  if (fs.existsSync(filePath) && fs.lstatSync(filePath).isFile()) { // check that file exists and is a file
+  console.log("Trying to read " + filePath)
 
+  infoString = "Contents of " + filePath + ":";
+  fileContent = fs.readFileSync(filePath, 'utf8')
+
+  } else {
+    fileContent = "File at " + filePath + " doesn't exist."
+  }
+}
+  res.send(fileContent)
+  // res.render('textreader', { fileContent, infoString });
+  
+
+})
 
 app.post('/exploit', async (req, res) => {
   let { exploitType } = req.body;
@@ -127,7 +151,6 @@ app.post('/exploit', async (req, res) => {
       res.send(result);
     } else if (exploitType === "Software and Data Integrity Failures") {
       let result = await productTampering();
-      console.log("RESULT OF CUFNCTIOn " + result)
       res.send(result);
     } else {
       res.send("Strange server error. This exploit doesnt exist.")
