@@ -20,14 +20,16 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-async function defaultCreds() {
+// helper functions for get and post requests
+async function postReq(url, data) {
   try {
-    const response = await fetch('http://localhost:3000/login', {
+    console.log(data)
+    const response = await fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ username: 'admin', password: 'admin' }),
+      body: JSON.stringify(data),
     });
     if (!response.ok) {
       return `Error: ${response.statusText}`;
@@ -39,9 +41,9 @@ async function defaultCreds() {
   }
 }
 
-async function pathTraversal() {
+async function getReq(url) {
   try {
-    const response = await fetch('http://localhost:3000/pathtraversal/..%2F..%2F..%2Fsecret.txt');
+    const response = await fetch(url);
     if (!response.ok) {
       return `Error: ${response.statusText}`;
     }
@@ -52,6 +54,17 @@ async function pathTraversal() {
   }
 }
 
+
+async function defaultCreds() {
+  return postReq('http://localhost:3000/login', {
+    username: 'admin',
+    password: 'admin',
+  });
+}
+
+async function pathTraversal() {
+  return getReq('http://localhost:3000/textreader?fileName=../../../../../../etc/passwd');
+}
 
 async function productTampering() {
   try {
@@ -134,8 +147,7 @@ app.get('/textreader', (req, res) => {
     fileContent = "File at " + filePath + " doesn't exist."
   }
 }
-  res.send(fileContent)
-  // res.render('textreader', { fileContent, infoString });
+  res.render('textreader', { fileContent, infoString });
   
 
 })
@@ -161,17 +173,30 @@ app.post('/exploit', async (req, res) => {
 
 });
 
-app.get('/pathtraversal', (req, res) => {
-  res.send("Path traversal vulnerability example. Try to add ..%2F to the url and read a file. Can you read /etc/passwd?")
-})
 
-app.get('/pathtraversal/*', (req, res) => {
-  let filePath = path.resolve(__dirname + req.params[0]);
-  if (fs.existsSync(filePath)) {
-    res.sendFile(filePath);
+app.get('/textreader', (req, res) => {
+  let fileName = req.query.fileName;
+  let infoString;
+  let fileContent = "Select a text file to read it."
+  filePath = path.resolve(__dirname + "/" + fileName);
+  // console.log(req.query)
+  console.log("PATH: " + filePath);
+  if(fileName){ // if the user gave a filepath, update filecontents and infostring.
+  console.log(filePath);
+  if (fs.existsSync(filePath) && fs.lstatSync(filePath).isFile()) { // check that file exists and is a file
+  console.log("Trying to read " + filePath)
+
+  infoString = "Contents of " + filePath + ":";
+  fileContent = fs.readFileSync(filePath, 'utf8')
+
   } else {
-    res.send("File at " + filePath + " doesn't exist.");
+    fileContent = "File at " + filePath + " doesn't exist."
   }
+}
+
+res.render('textreader', { fileContent, infoString });
+  
+
 })
 
 app.get('/bank', (req, res) => {
