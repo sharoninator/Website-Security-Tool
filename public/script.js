@@ -45,12 +45,12 @@ const exploitData = {
       } else {
           res.send("File at " + filePath + " doesn't exist.");
       }`,
-    url: "http://localhost:3001/pathtraversal",
+    url: "http://localhost:3001/textreader",
     secure: `Secure version not yet implemented`,
     successful_substring: "secret",
-    attack_request: "http://localhost:3001/pathtraversal/..%2F..%2F..%2Fsecret.txt",
+    attack_request: "window.location.href = 'http://localhost:3001/textreader?fileName=app.js'",
     custom_behavior: false,
-    server_side_exploit: true,
+    server_side_exploit: false,
     documentation_html_filepath: "placeholder.html"
   },
   "Software and Data Integrity Failures": {
