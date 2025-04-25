@@ -29,12 +29,25 @@ const exploitData = {
     documentation_html_filepath: "pathtraversal.html"
   },
   "Insecure Design": {
-    vulnerable: `Not yet implemented`,
+    vulnerable: `  let { recipient, amount } = req.body;
+  amount = parseInt(amount);
+  if (typeof amount === 'number') {
+    if (amount > accounts.l33th4x0r) {
+      amount = accounts.l33th4x0r;
+    }
+    accounts.l33th4x0r -= amount;
+    accounts[recipient] += amount;
+    res.json({ accountInfo: accounts, amountDeducted: amount });
+  }
+  else { 
+    res.send("Invalid data") 
+  }`,
     url: "http://localhost:3001/bank",
     secure: `Secure version not yet implemented`,
-    successful_substring: "secret",
-    attack_request: "???",
-    custom_behavior: false,
+    successful_substring: "-$-5000",
+    attack_request: `document.getElementById('amount').value = '-5000';
+document.getElementById('recipient').value = 'john';
+document.querySelector('button').click();`,
     server_side_exploit: false,
     documentation_html_filepath: "placeholder.html"
   },
@@ -110,11 +123,9 @@ async function sendExploit() {
         } else {
           // https://stackoverflow.com/questions/8240101/set-content-of-iframe
           iframe.src = 'about:blank';
-          iframe.onload = function () {
             iframe.contentWindow.document.open();
             iframe.contentWindow.document.write(result);
             iframe.contentWindow.document.close();
-          }
           console.log("Response body:", result);
 
         }

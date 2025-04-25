@@ -6,93 +6,276 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bank Account Dashboard</title>
     <style>
+        /* This is to get rid of increment arrows on number inputs for
+        Chrome, Safari, Edge, Opera, and firefox.*/
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #e9e9ff;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            margin: 20px auto;
+            max-width: 1200px;
+        }
+
+        .left-section,
+        .right-section {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        .left-section {
+            flex: 1;
+            margin-right: 20px;
+        }
+
+        .right-section {
+            flex: 2;
+        }
+
         table {
+            width: 100%;
             border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th,
+        td {
+            padding: 10px;
+            border: 1px solid gray;
             text-align: left;
         }
-        th, td {
+
+        th {
+            background-color: blue;
+            color: #fff;
+        }
+
+        form {
+            margin-top: 20px;
+        }
+
+        input,
+        select,
+        button {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 12px;
+            border: 1px solid gray;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        button {
             border: 1px solid black;
-            padding: 2px;
+            background-color: blue;
+            color: #fff;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        li {
+            padding: 8px 0px;
+        }
+
+        #info {
+            padding: 1px;
+            text-align: center;
+        }
+
+        #header {
+            text-align: center;
+            background-color: #007BFF;
+            color: white;
+            padding: 10px 20px;
+        }
+
+        h1 {
+            margin: 0;
         }
     </style>
+
+
+
 </head>
 
 <body>
-    <h1>Bank Account Dashboard</h1>
-    <p>Welcome to your bank account, <b>l33th4x0r.</b> Feel free to send money, and see your balance and transactions.
-    </p>
-    <p><strong>Account Total: $3,950</strong></p>
-    <table>
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th>Description</th>
-                <th>Amount</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>12/24/2024</td>
-                <td>Bug Bounty</td>
-                <td>$5,000</td>
-            </tr>
-            <tr>
-                <td>12/22/2024</td>
-                <td>Overclocked Gaming Laptop</td>
-                <td>-$3,000</td>
-            </tr>
-            <tr>
-                <td>12/21/2024</td>
-                <td>Finerless Gloves</td>
-                <td>-$50</td>
-            </tr>
-            <tr>
-                <td>12/19/2024</td>
-                <td>Server Racks</td>
-                <td>-$8,250</td>
-            </tr>
-            <tr>
-                <td>12/17/2024</td>
-                <td>Hardware Sale</td>
-                <td>$8,000</td>
-            </tr>
-            <tr>
-                <td>12/16/2024</td>
-                <td>Multiple Smartphones</td>
-                <td>-$1,800</td>
-            </tr>
-            <tr>
-                <td>12/15/2024</td>
-                <td>Fake Passports</td>
-                <td>-$2,000</td>
-            </tr>
-            <tr>
-                <td>12/14/2024</td>
-                <td>Hoodies</td>
-                <td>-$200</td>
-            </tr>
-            <tr>
-                <td>12/13/2024</td>
-                <td>Energy Drinks</td>
-                <td>-$600</td>
-            </tr>
-            <tr>
-                <td>12/12/2024</td>
-                <td>Mechanical RGB Keyboard</td>
-                <td>-$150</td>
-            </tr>
-            <tr>
-                <td>12/10/2024</td>
-                <td>12 Monitors</td>
-                <td>-$4,000</td>
-            </tr>
-            <tr>
-                <td>12/07/2024</td>
-                <td>Cash Deposit</td>
-                <td>$10,000</td>
-            </tr>
-        </tbody>
-    </table>
+
+    <header id="header">
+        <h1>Bank Account Dashboard</h1>
+    </header>
+    <div id="info">
+        <p>Welcome to your bank account, <b>l33th4x0r.</b> Feel free to manage your transactions and balances. Note:
+            Reloading the page resets the accounts. <br>
+            p.s: All transactions are handled server side, so you might as well not waste your time trying to crack our
+            super secure app.
+        </p>
+    </div>
+    <div class="container">
+        <div class="left-section">
+
+            <h2>Users</h2>
+            <ul>
+                <li id="l33th4x0r"><b>l33th4x0r</b> : $950</li>
+                <li id="john"><b>john</b> : $5,500</li>
+                <li id="gary"><b>gary</b> : $2,000</li>
+                <li id="wendy"><b>wendy</b> : $1,250</li>
+            </ul>
+
+            <h2>Send Money</h2>
+            <form id="sendMoneyForm" action="/bankendpoint" method="POST">
+                <label for="amount">Amount to send: </label>
+                <input type="number" id="amount" name="amount" required>
+                <label for="recipient">Recipient: </label>
+                <select id="recipient" name="recipient" required>
+                    <option value="john">john</option>
+                    <option value="gary">gary</option>
+                    <option value="wendy">wendy</option>
+                </select>
+                <button type="submit">Send Money</button>
+            </form>
+        </div>
+        <br>
+        <div class="right-section">
+            <h3>l33th4x0r's Transactions</h3>
+            <table id="transactions-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Description</th>
+                        <th>Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>12/24/2024</td>
+                        <td>Overclocked Gaming Laptop</td>
+                        <td>-$3,000</td>
+                    </tr>
+                    <tr>
+                        <td>12/22/2024</td>
+                        <td>Bug Bounty Cashout</td>
+                        <td>$3,000</td>
+                    </tr>
+                    <tr>
+                        <td>12/21/2024</td>
+                        <td>Finerless Gloves</td>
+                        <td>-$50</td>
+                    </tr>
+                    <tr>
+                        <td>12/19/2024</td>
+                        <td>Server Racks</td>
+                        <td>-$8,250</td>
+                    </tr>
+                    <tr>
+                        <td>12/17/2024</td>
+                        <td>Hardware Sale</td>
+                        <td>$8,000</td>
+                    </tr>
+                    <tr>
+                        <td>12/16/2024</td>
+                        <td>Multiple Smartphones</td>
+                        <td>-$1,800</td>
+                    </tr>
+                    <tr>
+                        <td>12/15/2024</td>
+                        <td>Fake Passports</td>
+                        <td>-$2,000</td>
+                    </tr>
+                    <tr>
+                        <td>12/14/2024</td>
+                        <td>Hoodies</td>
+                        <td>-$200</td>
+                    </tr>
+                    <tr>
+                        <td>12/13/2024</td>
+                        <td>Energy Drinks</td>
+                        <td>-$600</td>
+                    </tr>
+                    <tr>
+                        <td>12/12/2024</td>
+                        <td>Mechanical RGB Keyboard</td>
+                        <td>-$150</td>
+                    </tr>
+                    <tr>
+                        <td>12/10/2024</td>
+                        <td>12 Monitors</td>
+                        <td>-$4,000</td>
+                    </tr>
+                    <tr>
+                        <td>12/07/2024</td>
+                        <td>Cash Deposit</td>
+                        <td>$10,000</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('sendMoneyForm');
+        form.addEventListener('submit', function (event) {
+            event.preventDefault();  // prevent default form submission behavior so this javascript can recieve the response            
+            const amount = document.getElementById('amount').value;
+            const recipient = document.getElementById('recipient').value;
+
+            if (!amount || !recipient ) {
+            alert("Please fill in both the amount and recipient fields.");
+            return;  // Stop the function execution if validation fails
+        }
+            // make request with fetch()
+            fetch('/bank', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ amount, recipient })
+            }).then(response => response.json()).then(data => {
+                console.log(data)
+                const tableBody = document.getElementById('transactions-table');
+                let nowDate = new Date().toLocaleDateString();
+
+                // update transaction table with new transaction.
+                tableBody.insertBefore(
+                    Object.assign(document.createElement('tr'), {
+                        innerHTML: `<td>${nowDate}</td><td>Sent money to ${recipient}</td><td>-$${data.amountDeducted}</td>`
+                    }),
+                    tableBody.firstChild
+                );
+                // update all user balances so they reflect balances on the server.
+                Object.entries(data.accountInfo).forEach(([id, balance]) => {
+                    const userElement = document.getElementById(id);
+                    if (userElement) {
+                        userElement.innerHTML = `<b>${id}</b> : $${balance}`;
+                    }
+                });
+            }).catch((error) => {
+                console.error('Error:', error);
+            });
+
+        }
+    );
+    </script>
+
 </body>
 
 </html>
