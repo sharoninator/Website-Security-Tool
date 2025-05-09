@@ -98,6 +98,7 @@
     "ms": "^2.0.0",
     "negotiator": "^0.6.3",
     "netmask": "^2.0.2",
+    "node-fetch": "^3.3.2",
     "object-inspect": "^1.13.3",
     "on-finished": "^2.4.1",
     "once": "^1.4.0",
