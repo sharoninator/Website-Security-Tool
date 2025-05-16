@@ -5,6 +5,8 @@ const exploitSelect = document.getElementById("exploit-select");
 const attackRequest = document.getElementById("attack-code");
 const iframe = document.getElementById("exploit-iframe");
 const urlbar = document.getElementById("url-bar");
+const toggle = document.getElementById("toggle-mode-btn");
+let secureMode = false;
 
 const exploitData = {
   "Default Credentials": {
@@ -15,18 +17,33 @@ const exploitData = {
     res.sendFile(path.join(__dirname, 'public', 'failed.html'));
   }`,
     url: "http://localhost:3001/login",
-    secure: `Secure version not yet implemented`,
+    secureUrl: "http://localhost:3001/securelogin",
+    secure: `const storedHash = fs.readFileSync('hash.txt', 'utf8');
+  let { username, password } = req.body;
+  if (username === 'admin' && await bcrypt.compare(password, storedHash)) {
+    res.sendFile(path.join(__dirname, 'public', 'success.html'));
+  } else {
+    res.sendFile(path.join(__dirname, 'public', 'securefailed.html'));
+  }`,
     successful_substring: "Login Successful!",
-    attack_request: `await fetch('http://localhost:3001/login', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ username: 'admin', password: 'admin' }),
-    });`,
+    attack_request: `await fetch('URL', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({ username: 'admin', password: 'admin' }),
+});`,
     custom_behavior: false,
     server_side_exploit: true,
-    documentation_html_filepath: "pathtraversal.html"
+    documentation: `The server allows anyone to log in using hardcoded admin credentials (admin/admin), which are often left unchanged in production.
+
+This is dangerous because attackers can guess these easily and gain full access to resources that should only be accessible by the Admins.
+
+Vulnerability Fix: Store passwords as bcrypt hashes and validate using bcrypt.compare.
+
+More info:
+https://owasp.org/Top10/A07_2021-Identification_and_Authentication_Failures/
+https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html`
   },
   "Insecure Design": {
     vulnerable: `  let { recipient, amount } = req.body;
@@ -43,13 +60,38 @@ const exploitData = {
     res.send("Invalid data") 
   }`,
     url: "http://localhost:3001/bank",
-    secure: `Secure version not yet implemented`,
+    secureUrl: "http://localhost:3001/securebank",
+    secure: `  let { recipient, amount } = req.body;
+  amount = parseInt(amount);
+  if (typeof amount === 'number') {
+    if (amount > accounts.l33th4x0r) {
+      amount = accounts.l33th4x0r;
+    } else if(amount < 1){
+      res.json({error: "You can't send a negative amount of money!!! nice try hackerman."})
+      return;
+    } else {
+    accounts.l33th4x0r -= amount;
+    accounts[recipient] += amount;
+    res.json({ accountInfo: accounts, amountDeducted: amount });
+  }
+  }
+  else {
+    res.json({error: "Invalid data"})
+  }`,
     successful_substring: "-$-5000",
     attack_request: `document.getElementById('amount').value = '-5000';
 document.getElementById('recipient').value = 'john';
 document.querySelector('button').click();`,
     server_side_exploit: false,
-    documentation_html_filepath: "placeholder.html"
+    documentation: `The system does not prevent users from entering negative values or invalid inputs, allowing fund theft or logic abuse.
+
+This reflects a broader design flaw where key logic rules are missing or weak.
+
+Vulnerability Fix: Add input validation and enforce application constraints (for example: amount > 0).
+
+More info:
+https://owasp.org/Top10/A04_2021-Insecure_Design/
+https://top10proactive.owasp.org/`
   },
   "Path Traversal": {
     vulnerable: `let filePath = path.resolve(__dirname + req.params[0]);
@@ -59,12 +101,39 @@ document.querySelector('button').click();`,
           res.send("File at " + filePath + " doesn't exist.");
       }`,
     url: "http://localhost:3001/textreader",
-    secure: `Secure version not yet implemented`,
+    secureUrl: "http://localhost:3001/securetextreader",
+    secure: `  let fileName = req.query.fileName;
+  let infoString;
+  let fileContent = "Select a text file to read it."
+  let filePath = path.resolve(__dirname + "/" + fileName);
+  
+  console.log("PATH: " + filePath);
+  let validFiles = ["text1.txt", "text2.txt", "text3.txt"]
+  if(fileName in validFiles){ // if the user gave a valid filepath, update filecontents and infostring.
+  console.log(filePath);
+  if (fs.existsSync(filePath) && fs.lstatSync(filePath).isFile()) { // check that file exists and is a file
+    console.log("Trying to read " + filePath)
+
+    infoString = "Contents of " + filePath + ":";
+    fileContent = fs.readFileSync(filePath, 'utf8')
+
+  } else {
+    fileContent = "File at " + filePath + " doesn't exist."
+  }
+}
+  res.render('textreader', { fileContent, infoString });
+
+`,
     successful_substring: "secret",
-    attack_request: "window.location.href = 'http://localhost:3001/textreader?fileName=app.js'",
+    attack_request: "window.location.href = 'URL?fileName=app.js'",
     custom_behavior: true,
     server_side_exploit: false,
-    documentation_html_filepath: "placeholder.html"
+    documentation: `The app directly uses user input to build file paths, which allows attackers to access unauthorized files like app.js or other directories by using ../.
+
+Fix: Restrict input to a known safe list of filenames and avoid appending paths directly.
+
+More info:
+https://owasp.org/www-community/attacks/Path_Traversal`
   },
   "Software and Data Integrity Failures": {
     vulnerable: `??????????????`,
@@ -74,7 +143,7 @@ document.querySelector('button').click();`,
     attack_request: "????????",
     custom_behavior: true,
     server_side_exploit: true,
-    documentation_html_filepath: "placeholder.html"
+    documentation: "placeholder.html"
   },
   "Security Logging and Monitoring Failures": {
     vulnerable: `??????????????`,
@@ -84,7 +153,7 @@ document.querySelector('button').click();`,
     attack_request: "window.location.href = 'http://localhost:3000/rest/products/search?q=%27))%20union%20select%20id,email,password,4,5,6,7,8,9%20from%20users--'",
     custom_behavior: true,
     server_side_exploit: false,
-    documentation_html_filepath: "placeholder.html"
+    documentation: "placeholder.html"
   }
 }
 
@@ -95,22 +164,47 @@ function updateCode() {
   const exploit = exploitData[selectedExploit];
   vulnerableCode.textContent = exploit.vulnerable;
   secureCode.textContent = exploit.secure;
-  attackRequest.textContent = exploit.attack_request;
-  iframe.src = exploit.url;
-  urlbar.value = exploit.url;
+
+
+  document.getElementById("docs").textContent = exploit.documentation
+  response_output.innerHTML = "Was the exploit successful?";
+
+  let baseUrl;
+
+  if (secureMode) {
+    baseUrl = exploit.secureUrl;
+  } else {
+    baseUrl = exploit.url;
+  }
+
+  
+  attackRequest.textContent = exploit.attack_request.replace('URL', baseUrl);
+  iframe.src = baseUrl;
+  urlbar.value = baseUrl;
+
 }
 
 
 async function sendExploit() {
   try {
     let selectedExploit = exploitSelect.value;
+    const exploit = exploitData[selectedExploit];
+    let exploitUrl;
+
+    if (secureMode) {
+      exploitUrl = exploit.secureUrl;
+    } else {
+      exploitUrl = exploit.url;
+    }
     if (exploitData[selectedExploit].server_side_exploit == true) { // the exploit is to be sent from the server, and the iframe will be overwritten with the response
+
+      
       const response = await fetch('/exploit', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ exploitType: selectedExploit })
+        body: JSON.stringify({ exploitType: selectedExploit, url: exploitUrl })
       });
       if (response.ok) {
         const result = await response.text();
@@ -143,11 +237,13 @@ async function sendExploit() {
           urlbar.value = url
           iframe.src = url
         } if(selectedExploit == "Path Traversal"){
-        urlbar.value = "http://localhost:3001/textreader?fileName=app.js"
+        urlbar.value = exploitUrl + "?fileName=app.js"
         }
       }
-      console.log("Executing in iframe " + exploitData[selectedExploit].attack_request)
-      iframe.contentWindow.eval(exploitData[selectedExploit].attack_request);
+      let attackRequest = exploitData[selectedExploit].attack_request.replace('URL', exploitUrl);
+      
+      console.log("Executing in iframe " + attackRequest)
+      iframe.contentWindow.eval(attackRequest);
       result = iframe.contentWindow.document.body.innerText;
 
       const checkInterval = 500;
@@ -199,6 +295,24 @@ urlbar.addEventListener("keydown", function(event) {
   }
 });
 
+
+toggle.addEventListener("click", () => {
+  secureMode = !secureMode;
+
+  if (secureMode) {
+    toggle.textContent = "Toggle Insecure Mode";
+  } else {
+    toggle.textContent = "Toggle Secure Mode";
+  }
+
+  updateCode();
+});
+
+
+
+
 exploitSelect.addEventListener("change", updateCode);
 
-updateCode();
+document.addEventListener("DOMContentLoaded", updateCode )
+
+// updateCode()

@@ -77,3 +77,8 @@ button:hover {
     border: 2px solid lime;
     background-color: #2b2b2b;
 }
+
+#docs {
+    white-space: pre-wrap;
+  }
+  

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text File Viewer</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="container">
+        <h1>Text File Viewer</h1>
+        <form action="/securetextreader" method="GET">
+            <div class="dropdown">
+                <label for="textSelect">Select a text file:</label>
+                <select name="fileName" onchange="this.form.submit()">
+                    <option value="">Choose a text file</option>
+                    <option value="text1.txt">Text 1</option>
+                    <option value="text2.txt">Text 2</option>
+                    <option value="text3.txt">Text 3</option>
+                </select>
+            </div>
+        </form>
+        <%= infoString %>
+        <br>
+        <div>
+            <pre><%= fileContent %></pre>
+        </div>
+    </div>
+</body>
+
+</html>
